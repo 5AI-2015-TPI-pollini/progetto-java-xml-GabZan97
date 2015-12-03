@@ -1,2 +1,1 @@
-# progetto-java-xml-GabZan97
-progetto-java-xml-GabZan97 created by Classroom for GitHub
+WeatherFinder is a project created by Gabriele Zanelli 5^AI IIS Benedetto Castelli, born as a classwork.

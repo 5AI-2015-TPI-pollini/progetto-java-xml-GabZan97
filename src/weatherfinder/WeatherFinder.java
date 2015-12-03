@@ -15,6 +15,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 /**
+ * Graphic interface of the application
  * @author Zanelli Gabriele
  */
 
@@ -39,7 +40,6 @@ public class WeatherFinder extends Application {
         TextField searchField = new TextField();
         rootGrid.add(searchField, 0, 0);
         Button searchButton = new Button();
-//        GridPane.setHalignment(searchButton, HPos.CENTER);
         searchButton.setText("Search");
         rootGrid.add(searchButton,1,0);
          
@@ -64,19 +64,19 @@ public class WeatherFinder extends Application {
         TextField precipitationField = new TextField();
         rootGrid.add(precipitationField, 1, 5);
         
-        // Second type of action of click
-//        btn.setOnAction(new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent event) {
-//                System.out.println("Hello World!");
-//            }
-//        });
-
-        // Add an action on button click
+        // Add an action on button click that check connection and if it works, retrieve information from Web Services
          searchButton.setOnAction(e -> {
+            if(!checker.tryConnection()) {
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle("Internet connection not available");
+                alert.setHeaderText("Ooops!");
+                alert.setContentText("I can't reach the internet!\n "
+                        + "Check connection or proxy configuration. ");
+                alert.show();
+            }
+                
             String[] splitted;
-    //        ProxyUtilities proxy = new ProxyUtilities("wwww.google.it");
-            String coords = WebServices.findAddressCoords(searchField.getText().replace(" ","+"));
+            String coords = WebServices.findAddressCoords(searchField.getText());
             
             // If Google can't find user's search, show an alert and allow the user to search again
             if(coords==null)
@@ -85,8 +85,9 @@ public class WeatherFinder extends Application {
                 alert.setTitle("Nothing was found :(");
                 alert.setHeaderText("Ooops!");
                 alert.setContentText("Oops! Seems like we can't find this address!\n"
-                                + "Try to search something else!");
+                                + "Try to search something else.");
                 alert.show();
+                searchField.setText("");
             }
             else {
                 splitted = coords.split("§");
@@ -105,6 +106,10 @@ public class WeatherFinder extends Application {
         myStage.show();
     }
     
+    /**
+     * Main function starting graphic interface
+     * @param args
+     */
     public static void main(String[] args) {
         launch(args);
     }

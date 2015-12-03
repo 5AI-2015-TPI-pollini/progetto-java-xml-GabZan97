@@ -17,14 +17,21 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
+ * Contains Web Services' API in order to search places and retrieve meteo condition
  * @author Zanelli Gabriele
  */
 
 public class WebServices {
    
+    /**
+     * Search a String on Google Geocode and return coordinates of the site
+     * @param address insert any address/city/postal code to search
+     * @return String containing latitude and longitude separated by "§"
+     */
     public static String findAddressCoords(String address) {
     
         try {
+            address = address.replace(" ","+");
             // Create the proper URL in order to search the address with Google Geocode
             URL googleUrl = new URL("http://maps.googleapis.com/maps/api/geocode/xml?address=" + address + "&sensor=false");
             Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(googleUrl.openStream());
@@ -41,7 +48,7 @@ public class WebServices {
                 return null;
             }
             else {
-                System.out.println("Latitude:"+latitude+"\nLongitude"+longitude+" found!");
+                System.out.println("Latitude: "+latitude+" and Longitude: "+longitude+" found!");
                 return latitude+"§"+longitude;
             }
         } catch (MalformedURLException ex) {
@@ -52,6 +59,12 @@ public class WebServices {
         return null;
     }
     
+    /**
+     * Search latitude and longitude of a site and return meteo conditions
+     * @param latitude insert latitude of the site
+     * @param longitude insert longitude of the site
+     * @return a String containing value of weather type, temperature, humidity, wind speed and precipitation separated by "§"
+     */
     public static String findMeteoByCoords(String latitude, String longitude) {
         try {
             // Create the proper URL in order to search the coordinates with Open Weather
@@ -78,6 +91,7 @@ public class WebServices {
         return null;
    }
     
+    // Retrieve path's values using XPath
     private static String getValues(XPath xpath, Document doc, String path) {
         try {
             XPathExpression genericPath = xpath.compile(path);

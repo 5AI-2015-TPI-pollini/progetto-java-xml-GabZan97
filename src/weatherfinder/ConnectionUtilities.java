@@ -4,11 +4,11 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import static java.lang.System.exit;
 import java.net.Authenticator;
-import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.net.URLConnection;
@@ -38,16 +38,14 @@ public class ConnectionUtilities {
 
     private void tryConnection() {
         try {
-            URLConnection check = new URL("http://www.google.com").openConnection();
+            InputStream check = new URL("http://www.google.com").openConnection().getInputStream();
             System.out.println("Internet connection established!");
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(ConnectionUtilities.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             System.out.println("Can't connect to Internet! Trying with proxy...");
             try {
                 setProxy();
-                URLConnection check = new URL("http://www.google.com").openConnection();
-            } catch (IOException ex1) {
+                InputStream check = new URL("http://www.google.com").openConnection().getInputStream();
+            } catch (Exception ex1) {
                 System.out.println("Internet connection is not available!");
             }
         }
@@ -73,40 +71,40 @@ public class ConnectionUtilities {
     //If configuration file is missing, ask user to insert proxy settings
     private void configFileMissing(){
         Dialog<String[]> dialog = new Dialog<>();
-        dialog.setTitle("Login Dialog");
-        dialog.setHeaderText("Please insert proxy configuration");
+        dialog.setTitle("Proxy Settings");
+        dialog.setHeaderText("Please add proper proxy configuration");
 
-        ButtonType loginButtonType = new ButtonType("Login", ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+        ButtonType saveButton = new ButtonType("Save", ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveButton, ButtonType.CANCEL);
 
         // Create labels and fields in order to get proxy settings
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
+        GridPane proxyGrid = new GridPane();
+        proxyGrid.setHgap(10);
+        proxyGrid.setVgap(10);
+        proxyGrid.setPadding(new Insets(20, 150, 10, 10));
 
         TextField address = new TextField();
         address.setPromptText("192.168.0.1");
         TextField port = new TextField();
         port.setPromptText("8080");
         TextField username = new TextField();
-        username.setPromptText("username");
+        username.setPromptText("user");
         PasswordField password = new PasswordField();
-        password.setPromptText("password");
+        password.setPromptText("pw");
 
-        grid.add(new Label("Server Address:"), 0, 0);
-        grid.add(address, 1, 0);
-        grid.add(new Label("Server Port:"), 0, 1);
-        grid.add(port, 1, 1);
-        grid.add(new Label("Username:"), 0, 2);
-        grid.add(username, 1, 2);
-        grid.add(new Label("Password:"), 0, 3);
-        grid.add(password, 1, 3);
+        proxyGrid.add(new Label("Server Address:"), 0, 0);
+        proxyGrid.add(address, 1, 0);
+        proxyGrid.add(new Label("Server Port:"), 0, 1);
+        proxyGrid.add(port, 1, 1);
+        proxyGrid.add(new Label("Username:"), 0, 2);
+        proxyGrid.add(username, 1, 2);
+        proxyGrid.add(new Label("Password:"), 0, 3);
+        proxyGrid.add(password, 1, 3);
 
-        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().setContent(proxyGrid);
 
         dialog.setResultConverter((ButtonType dialogButton) -> {
-            if (dialogButton == loginButtonType) {
+            if (dialogButton == saveButton) {
                 return new String[]{address.getText(), port.getText(), username.getText(), password.getText()};
             }
             if (dialogButton == ButtonType.CANCEL) {

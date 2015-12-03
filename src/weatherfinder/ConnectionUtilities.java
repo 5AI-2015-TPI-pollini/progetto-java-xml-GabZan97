@@ -1,6 +1,7 @@
 package weatherfinder;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -11,7 +12,6 @@ import static java.lang.System.exit;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,6 +25,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
 /**
+ * Contains utilities that allows user to check connection, even under proxy
  * @author Zanelli Gabriele
  */
 
@@ -32,28 +33,41 @@ public class ConnectionUtilities {
     
     private String serverAddress, proxyPort, ID, PW;
 
+    /**
+     * Try to test connection to internet by opening stream to Google, if it can't reach, automatically
+     * show proxy configuration
+     */
     public ConnectionUtilities() {
-        tryConnection();
     }
 
-    private void tryConnection() {
+    /**  
+     * Check internet connection
+     * @return a Boolean indicating if connection is established
+     */
+    public boolean tryConnection() {
         try {
             InputStream check = new URL("http://www.google.com").openConnection().getInputStream();
             System.out.println("Internet connection established!");
+            return true;
         } catch (Exception ex) {
             System.out.println("Can't connect to Internet! Trying with proxy...");
             try {
                 setProxy();
                 InputStream check = new URL("http://www.google.com").openConnection().getInputStream();
+                System.out.println("Internet connection established with proxy!");
+                return true;
             } catch (Exception ex1) {
+                // If can't reach internet even under proxy, delete the from configuration
+                deleteConfigFile();
                 System.out.println("Internet connection is not available!");
+                return false;
             }
         }
     }
     
     // Set proxy settings from file
     private void setProxy() {
-        readSettings();
+        readConfigFile();
         Authenticator.setDefault(new Authenticator() {
             @Override
             public PasswordAuthentication getPasswordAuthentication() {
@@ -120,11 +134,11 @@ public class ConnectionUtilities {
             ID = configuration[2];
             PW = configuration[3];
         });
-        writeSettings();
+        writeConfigFile();
     }
     
     // Read proxy configuration from file
-    private void readSettings() {
+    private void readConfigFile() {
         try (BufferedReader br = new BufferedReader(new FileReader("proxy.config"))) {
             serverAddress = br.readLine();
             proxyPort = br.readLine();
@@ -138,7 +152,7 @@ public class ConnectionUtilities {
     }
    
     // Write proxy configuration to file
-    private void writeSettings(){
+    private void writeConfigFile(){
         try (PrintWriter pw = new PrintWriter ("proxy.config", "UTF-8")){
             pw.println(serverAddress);
             pw.println(proxyPort);
@@ -148,5 +162,10 @@ public class ConnectionUtilities {
         } catch (FileNotFoundException | UnsupportedEncodingException ex) {
             Logger.getLogger(ConnectionUtilities.class.getName()).log(Level.SEVERE, null, ex);
         } 
+    }
+    
+    // Delete proxy configuration file
+    private void deleteConfigFile(){
+        new File("proxy.config").delete();
     }
 }

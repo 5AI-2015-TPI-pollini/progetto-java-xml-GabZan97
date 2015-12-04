@@ -1,32 +1,53 @@
 
 package weatherfinder;
 
-import java.text.DecimalFormat;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 /**
- * Graphic interface of the application
+ * Start the Appliacation adding structure
  * @author Zanelli Gabriele
  */
 
 public class WeatherFinder extends Application {
-    
+            
     @Override
     public void start(Stage myStage) {
-        myStage.setTitle("WeatherFinder");
-        
-        ConnectionUtilities checker = new ConnectionUtilities();
-        
+        try {
+            // Import file FXML containg GUI Structure and the Icon
+            Parent root = FXMLLoader.load(WeatherFinder.class.getClassLoader().getResource("res/GUI.fxml"));
+            myStage.setTitle("Weather Finder");
+            myStage.getIcons().add(new Image(WeatherFinder.class.getClassLoader().getResourceAsStream("res/icon.png")));
+            myStage.setScene((new Scene(root)));
+            myStage.show();
+            
+        } catch (IOException ex) {
+            Logger.getLogger(WeatherFinder.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    /**
+     * Main function starting graphic interface
+     * @param args
+     */
+    public static void main(String[] args) {
+        launch(args);
+    }
+    
+    private void createApplicationCode(){
         // Create a table
         GridPane rootGrid = new GridPane();
         rootGrid.setPadding(new Insets(15));
@@ -63,55 +84,6 @@ public class WeatherFinder extends Application {
         rootGrid.add(new Label("Precipitation:"), 0, 5);
         TextField precipitationField = new TextField();
         rootGrid.add(precipitationField, 1, 5);
-        
-        // Add an action on button click that check connection and if it works, retrieve information from Web Services
-         searchButton.setOnAction(e -> {
-            if(!checker.tryConnection()) {
-                Alert alert = new Alert(AlertType.INFORMATION);
-                alert.setTitle("Internet connection not available");
-                alert.setHeaderText("Ooops!");
-                alert.setContentText("I can't reach the internet!\n "
-                        + "Check connection or proxy configuration. ");
-                alert.show();
-            }
-                
-            String[] splitted;
-            String coords = WebServices.findAddressCoords(searchField.getText());
-            
-            // If Google can't find user's search, show an alert and allow the user to search again
-            if(coords==null)
-            {
-                Alert alert = new Alert(AlertType.INFORMATION);
-                alert.setTitle("Nothing was found :(");
-                alert.setHeaderText("Ooops!");
-                alert.setContentText("Oops! Seems like we can't find this address!\n"
-                                + "Try to search something else.");
-                alert.show();
-                searchField.setText("");
-            }
-            else {
-                splitted = coords.split("§");
-                String conditions = WebServices.findMeteoByCoords(splitted[0],splitted[1]);
-                splitted = conditions.split("§");
-                weatherField.setText(splitted[0]);
-                temperatureField.setText(new DecimalFormat("#").format((Double.valueOf(splitted[1])-273.15))+"° C");
-                umidityField.setText(splitted[2]+"%");
-                windField.setText(splitted[3]+" km/h");
-                precipitationField.setText(splitted[4]);
-            }
-        });
-        
-        // Set the scene visible on stage
-        myStage.setScene(weatherScene);
-        myStage.show();
-    }
-    
-    /**
-     * Main function starting graphic interface
-     * @param args
-     */
-    public static void main(String[] args) {
-        launch(args);
     }
     
 }

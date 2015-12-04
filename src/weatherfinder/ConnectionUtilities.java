@@ -32,6 +32,7 @@ import javafx.scene.layout.GridPane;
 public class ConnectionUtilities {
     
     private String serverAddress, proxyPort, ID, PW;
+    private final String configFilePath = "proxy.config";
 
     /**
      * Try to test connection to internet by opening stream to Google, if it can't reach, automatically
@@ -139,7 +140,7 @@ public class ConnectionUtilities {
     
     // Read proxy configuration from file
     private void readConfigFile() {
-        try (BufferedReader br = new BufferedReader(new FileReader("proxy.config"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(configFilePath))) {
             serverAddress = br.readLine();
             proxyPort = br.readLine();
             ID = br.readLine();
@@ -153,7 +154,7 @@ public class ConnectionUtilities {
    
     // Write proxy configuration to file
     private void writeConfigFile(){
-        try (PrintWriter pw = new PrintWriter ("proxy.config", "UTF-8")){
+        try (PrintWriter pw = new PrintWriter (configFilePath, "UTF-8")){
             pw.println(serverAddress);
             pw.println(proxyPort);
             pw.println(ID);
@@ -166,6 +167,6 @@ public class ConnectionUtilities {
     
     // Delete proxy configuration file
     private void deleteConfigFile(){
-        new File("proxy.config").delete();
+        new File(configFilePath).delete();
     }
 }
